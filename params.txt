@@ -1,4 +1,4 @@
 SIGMA: 2
-THRES: 0.005
+THRES: 0.0025
 
 

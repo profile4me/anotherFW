@@ -1,5 +1,8 @@
 #include "PeriodAssets.h"
 #include <cstdio>
+#include <TPRegexp.h>
+#include <TObjArray.h>
+#include <TObjString.h>
 
 const void* PeriodAssets::mock = PeriodAssets::init(); 
 float PeriodAssets::SIGMA = 2;
@@ -15,6 +18,29 @@ bool PeriodAssets::isEmpty(int cid) {
 	return false;
 }
 
+TString PeriodAssets::getDSTs(int d, int n) {
+	TPRegexp re("be19([0-9]{3})");
+	char buffer[100];
+	int counter=0;
+	TString res;
+	FILE* dst_list = fopen("dst.list", "r");
+	while (EOF != fscanf(dst_list, "%s", buffer)) {
+		TObjArray* matches = re.MatchS(buffer);
+		if (matches->GetEntries()) {
+			int day = ((TObjString*)matches->At(1))->String().Atoi();
+			if (day==d) {
+				res += Form("%s,", buffer);
+				if (++counter==n) {
+					fclose(dst_list);
+					return res;
+				}
+			}
+		}
+	}
+	fclose(dst_list);
+	printf("WARNING!!! Not enoght dst files!!\n");
+	return res;
+}
 
 void* PeriodAssets::init() {
 	FILE* params = fopen("params.txt", "r");
